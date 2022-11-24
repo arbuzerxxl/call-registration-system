@@ -1,0 +1,20 @@
+version: "3.8"
+
+volumes:
+  rabbitmq_data:
+
+services:
+    rabbitmq3:
+        container_name: "rabbitmq"
+        image: rabbitmq:latest
+        # command: rabbitmq-plugins enable rabbitmq_management
+        environment:
+            - RABBITMQ_DEFAULT_USER=rabbit
+            - RABBITMQ_DEFAULT_PASS=mypassword
+        volumes:
+          - rabbitmq_data:/var/lib/rabbitmq
+        ports:
+            # AMQP protocol port
+            - '5672:5672'
+            # HTTP management UI
+            - '15672:15672'

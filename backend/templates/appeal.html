@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<form action="/appeal" method="post">
+    {% module xsrf_form_html() %}
+    <p>Введите фамилию: <input name="last_name" type="text"></p>
+    <p>Введите имя: <input name="first_name" type="text"></p>
+    <p>Введите отчество: <input name="patronymic" type="text"></p>
+    <p>Введите ваш номер телефона: <input name="phone_number" type="number"></p>
+    <p>Введите ваше обращение:</p>
+    <textarea name="comment"></textarea><br>
+    
+<input type="submit" value="Отправить">
+
+</form>
+
+{% end %}
