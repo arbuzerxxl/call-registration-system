@@ -1,10 +1,10 @@
 import asyncio
+import uvicorn
 from fastapi import FastAPI
+from pony.orm import db_session
 from pika_client import PikaClient
 from logger import logger, configure_logging
 from models import db_user_appeal, UserAppeal
-import uvicorn
-from pony.orm import db_session
 
 
 db_user_appeal.generate_mapping(create_tables=True)
@@ -19,18 +19,13 @@ class App(FastAPI):
     @classmethod
     @db_session
     def log_incoming_message(cls, message: dict):
-        """Выводит полученное с очереди сообщение в логи"""
-        UserAppeal(
-            last_name=message.get("last_name", None),
-            first_name=message.get("first_name", None),
-            patronymic=message.get("patronymic", None),
-            phone_number=message.get("phone_number", None),
-            appeal=message.get("appeal", None))
-        logger.info('Получили сообщение: %s', message)
+        """Выводит сообщение, полученное из очереди, в логи"""
+        logger.info(f'Получено сообщение из очереди: {message}')
+        UserAppeal(**message)
+        logger.info(f'Обращение зарегистрированно в БД')
 
 
 app = App()
-configure_logging()
 
 
 @app.on_event('startup')

@@ -7,13 +7,14 @@ from aio_pika import connect_robust
 
 class PikaClient:
 
-    LOGIN = 'rabbit'
-    PASSWORD = 'mypassword'
+    LOGIN = os.environ.get('RABBIT_LOGIN', 'rabbit')
+    PASSWORD = os.environ.get('RABBIT_PASSWORD', 'mypassword')
 
     def __init__(self, process_callable):
+
         credentials = pika.PlainCredentials(self.LOGIN, self.PASSWORD)
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'rabbitmq'), credentials=credentials, port=5672, virtual_host='/')
+            pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'), credentials=credentials, port=5672, virtual_host='/')
         )
         self.channel = self.connection.channel()
 
@@ -22,7 +23,8 @@ class PikaClient:
 
     async def consume(self, loop):
         """Подключение слушателя очереди"""
-        connection = await connect_robust(host=os.environ.get('RABBIT_HOST', 'rabbitmq'),
+
+        connection = await connect_robust(host=os.environ.get('RABBIT_HOST', 'localhost'),
                                           login=self.LOGIN,
                                           password=self.PASSWORD,
                                           port=5672,
@@ -30,13 +32,13 @@ class PikaClient:
         channel = await connection.channel()
         queue = await channel.declare_queue(os.environ.get('CONSUME_QUEUE', 'user_appeals'))
         await queue.consume(self.process_incoming_message, no_ack=False)
-        logger.info('Слушатель подключен')
+        logger.info('Очередь подключена к форме')
         return connection
 
     async def process_incoming_message(self, message):
-        """Processing incoming message from RabbitMQ"""
+        """Отображение полученного сообещния в логи"""
+
         await message.ack()
         body = message.body
-        logger.info('Получено сообщение')
         if body:
             self.process_callable(json.loads(body))

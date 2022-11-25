@@ -1,10 +1,11 @@
-import tornado.ioloop
-import tornado.web
 import os
 import uuid
-from tornado.options import define, options
 from sender import SenderToRabbit
 import ujson
+import tornado.ioloop
+import tornado.web
+from tornado.options import define, options
+from logger import configure_logging
 
 
 define("port", default=8888, help="run on the given port", type=int)
@@ -21,7 +22,7 @@ class Application(tornado.web.Application):
             title="Форма обращений",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=True,
+            xsrf_cookies=False,
             cookie_secret=uuid.uuid4().int,
             debug=True,
         )
@@ -54,10 +55,10 @@ class AppealHandler(tornado.web.RequestHandler):
 
 
 if __name__ == "__main__":
+    configure_logging()
     sender = SenderToRabbit()
     sender.connect_to_channel()
     sender.setup_exchange()
-    # sender.setup_queue()
     sender.queue_bind()
     app = Application()
     app.listen(options.port)

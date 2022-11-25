@@ -3,15 +3,16 @@
 import pika
 import os
 from pika.exchange_type import ExchangeType
+from logger import logger
 
 
 class SenderToRabbit:
 
-    QUEUE_NAME = "user_appeals"
-    EXCHANGE_NAME = "exchange_appeals"
+    QUEUE_NAME = os.environ.get('CONSUME_QUEUE', 'user_appeals')
+    EXCHANGE_NAME = os.environ.get('EXCHANGE_NAME', 'exchange_appeals')
+    LOGIN = os.environ.get('RABBIT_LOGIN', 'rabbit')
+    PASSWORD = os.environ.get('RABBIT_PASSWORD', 'mypassword')
     EXCHANGE_TYPE = ExchangeType.fanout
-    LOGIN = 'rabbit'
-    PASSWORD = 'mypassword'
 
     def __init__(self):
 
@@ -42,8 +43,8 @@ class SenderToRabbit:
 
         credentials = pika.PlainCredentials(self.LOGIN, self.PASSWORD)
 
-        parameters = pika.ConnectionParameters(host='rabbitmq',
-                                               port=5672,
+        parameters = pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'),
+                                               port=os.environ.get('RABBIT_PORT', '5672'),
                                                virtual_host='/',
                                                credentials=credentials)
 
@@ -60,7 +61,8 @@ class SenderToRabbit:
         self._channel.basic_publish(exchange=self.EXCHANGE_NAME,
                                     routing_key=f'{self.QUEUE_NAME}-{self.EXCHANGE_NAME}',
                                     body=body)
-        print("[x] Sent Message")
+
+        logger.info(f'Получено сообщение из формы: {body}')
 
     def disconnect_from_channel(connection: object):
 
@@ -69,8 +71,8 @@ class SenderToRabbit:
 
 def main():
 
-    # logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     sender = SenderToRabbit()
+
     try:
         sender.connect_to_channel()
     except KeyboardInterrupt:
