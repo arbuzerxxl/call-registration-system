@@ -7,8 +7,8 @@ from pika.exchange_type import ExchangeType
 
 class SenderToRabbit:
 
-    QUEUE_NAME = "appeal2"
-    EXCHANGE_NAME = "test2"
+    QUEUE_NAME = "user_appeals"
+    EXCHANGE_NAME = "exchange_appeals"
     EXCHANGE_TYPE = ExchangeType.fanout
     LOGIN = 'rabbit'
     PASSWORD = 'mypassword'
@@ -42,7 +42,7 @@ class SenderToRabbit:
 
         credentials = pika.PlainCredentials(self.LOGIN, self.PASSWORD)
 
-        parameters = pika.ConnectionParameters(host='localhost',
+        parameters = pika.ConnectionParameters(host='rabbitmq',
                                                port=5672,
                                                virtual_host='/',
                                                credentials=credentials)

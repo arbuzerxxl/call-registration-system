@@ -57,7 +57,7 @@ if __name__ == "__main__":
     sender = SenderToRabbit()
     sender.connect_to_channel()
     sender.setup_exchange()
-    sender.setup_queue()
+    # sender.setup_queue()
     sender.queue_bind()
     app = Application()
     app.listen(options.port)
