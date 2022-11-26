@@ -1,6 +1,6 @@
 import os
 import uuid
-from sender import SenderToRabbit
+from publisher import Publisher
 import ujson
 import tornado.ioloop
 import tornado.web
@@ -56,7 +56,7 @@ class AppealHandler(tornado.web.RequestHandler):
 
 if __name__ == "__main__":
     configure_logging()
-    sender = SenderToRabbit()
+    sender = Publisher()
     sender.connect_to_channel()
     sender.setup_exchange()
     sender.queue_bind()

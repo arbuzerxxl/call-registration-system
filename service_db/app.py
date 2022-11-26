@@ -2,7 +2,7 @@ import asyncio
 import uvicorn
 from fastapi import FastAPI
 from pony.orm import db_session
-from pika_client import PikaClient
+from consumer import Consumer
 from logger import logger, configure_logging
 from models import db_user_appeal, UserAppeal
 
@@ -14,7 +14,7 @@ class App(FastAPI):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pika_client = PikaClient(self.log_incoming_message)
+        self.pika_client = Consumer(self.log_incoming_message)
 
     @classmethod
     @db_session
@@ -31,7 +31,7 @@ app = App()
 @app.on_event('startup')
 async def startup():
     loop = asyncio.get_running_loop()
-    task = loop.create_task(app.pika_client.consume(loop))
+    task = loop.create_task(app.Consumer.consume(loop))
     await task
 
 
