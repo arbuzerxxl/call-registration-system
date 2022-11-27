@@ -7,14 +7,19 @@ from aio_pika import connect_robust
 
 class Consumer:
 
-    LOGIN = os.environ.get('RABBIT_LOGIN', 'rabbit')
-    PASSWORD = os.environ.get('RABBIT_PASSWORD', 'mypassword')
+    LOGIN = os.environ.get('RABBITMQ_DEFAULT_USER', 'rabbit')
+    PASSWORD = os.environ.get('RABBITMQ_DEFAULT_PASS', 'mypassword')
 
     def __init__(self, process_callable):
 
         credentials = pika.PlainCredentials(self.LOGIN, self.PASSWORD)
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'), credentials=credentials, port=5672, virtual_host='/')
+            pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'),
+                                      credentials=credentials,
+                                      heartbeat=3600,
+                                      connection_attempts=3,
+                                      port=5672,
+                                      virtual_host='/')
         )
         self._channel = self._connection.channel()
 

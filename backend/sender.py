@@ -10,8 +10,8 @@ class SenderToRabbit:
 
     QUEUE_NAME = os.environ.get('CONSUME_QUEUE', 'user_appeals')
     EXCHANGE_NAME = os.environ.get('EXCHANGE_NAME', 'exchange_appeals')
-    LOGIN = os.environ.get('RABBIT_LOGIN', 'rabbit')
-    PASSWORD = os.environ.get('RABBIT_PASSWORD', 'mypassword')
+    LOGIN = os.environ.get('RABBITMQ_DEFAULT_USER', 'rabbit')
+    PASSWORD = os.environ.get('RABBITMQ_DEFAULT_PASS', 'mypassword')
     EXCHANGE_TYPE = ExchangeType.fanout
 
     def __init__(self):

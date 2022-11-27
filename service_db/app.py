@@ -4,17 +4,17 @@ from fastapi import FastAPI
 from pony.orm import db_session
 from consumer import Consumer
 from logger import logger, configure_logging
-from models import db_user_appeal, UserAppeal
+from models import POSTGRES_USER_appeal, UserAppeal
 
 
-db_user_appeal.generate_mapping(create_tables=True)
+POSTGRES_USER_appeal.generate_mapping(create_tables=True)
 
 
 class App(FastAPI):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pika_client = Consumer(self.log_incoming_message)
+        self.consumer = Consumer(self.log_incoming_message)
 
     @classmethod
     @db_session
@@ -26,12 +26,13 @@ class App(FastAPI):
 
 
 app = App()
+configure_logging()
 
 
 @app.on_event('startup')
 async def startup():
     loop = asyncio.get_running_loop()
-    task = loop.create_task(app.Consumer.consume(loop))
+    task = loop.create_task(app.consumer.consume(loop))
     await task
 
 

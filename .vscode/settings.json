@@ -4,11 +4,11 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5433,
-            "askForPassword": true,
             "driver": "PostgreSQL",
             "name": "appeals",
             "database": "user_appeal",
-            "username": "postgres"
+            "username": "postgres",
+            "password": "password"
         }
     ]
 }

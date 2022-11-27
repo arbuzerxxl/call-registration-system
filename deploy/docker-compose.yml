@@ -2,6 +2,8 @@ version: "3.8"
 
 volumes:
   rabbitmq_data:
+  postgres_volume:
+
 
 services:
 
@@ -19,22 +21,23 @@ services:
     networks:
       main:
 
+
   rabbitmq:
     container_name: "rabbitmq"
     image: rabbitmq:management
     restart: unless-stopped
-    environment:
-        - RABBITMQ_DEFAULT_USER=rabbit
-        - RABBITMQ_DEFAULT_PASS=mypassword
+    env_file:
+      - ./../.env
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
-        # AMQP protocol port
-        - '5672:5672'
-        # HTTP management UI
-        - '15672:15672'
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
     networks:
       main:
+
 
   servicedb:
     container_name: servicedb
@@ -48,20 +51,26 @@ services:
     networks:
       main:
 
+
   db:
     container_name: postgresql_db
     image: postgres:latest
     restart: unless-stopped
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=user_appeal
+    env_file:
+      - ./../.env
     volumes:
-      - ../db:/var/lib/postgresql/data
+      - postgres_volume:/var/lib/postgresql/data
     networks:
       main:
     ports:
       - "5433:5432"
+
+  app:
+    image: nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ../frontend/static:/usr/share/nginx/html
 
 networks:
   main:

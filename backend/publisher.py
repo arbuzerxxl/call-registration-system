@@ -10,19 +10,14 @@ class Publisher:
 
     QUEUE_NAME = os.environ.get('CONSUME_QUEUE', 'user_appeals')
     EXCHANGE_NAME = os.environ.get('EXCHANGE_NAME', 'exchange_appeals')
-    LOGIN = os.environ.get('RABBIT_LOGIN', 'rabbit')
-    PASSWORD = os.environ.get('RABBIT_PASSWORD', 'mypassword')
+    LOGIN = os.environ.get('RABBITMQ_DEFAULT_USER', 'rabbit')
+    PASSWORD = os.environ.get('RABBITMQ_DEFAULT_PASS', 'mypassword')
     EXCHANGE_TYPE = ExchangeType.fanout
 
     def __init__(self):
 
         self._channel = None
         self._connection = None
-        self.connect_to_channel()
-        self.setup_exchange()
-        self.setup_queue()
-        self.queue_bind()
-        self.disconnect()
 
     def setup_exchange(self):
 
@@ -48,19 +43,16 @@ class Publisher:
 
         credentials = pika.PlainCredentials(self.LOGIN, self.PASSWORD)
 
-        parameters = pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'),
-                                               port=os.environ.get('RABBIT_PORT', '5672'),
-                                               virtual_host='/',
-                                               credentials=credentials)
+        params = pika.ConnectionParameters(host=os.environ.get('RABBIT_HOST', 'localhost'),
+                                           port=os.environ.get('RABBIT_PORT', '5672'),
+                                           virtual_host='/',
+                                           heartbeat=3600,
+                                           connection_attempts=3,
+                                           credentials=credentials)
 
-        connection = pika.BlockingConnection(parameters)
-        # connection = pika.SelectConnection(parameters=parameters)
+        self._connection = pika.BlockingConnection(parameters=params)
 
-        self._connection = connection
-
-        channel = connection.channel()
-
-        self._channel = channel
+        self._channel = self._connection.channel()
 
     def publish(self, body):
 
