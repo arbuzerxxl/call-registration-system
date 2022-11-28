@@ -1,7 +1,7 @@
 import os
 from pony.orm import Database, Required
 
-POSTGRES_USER_appeal = Database()
+UserAppealDB = Database()
 
 DB_CONFIG = dict(
     provider=os.environ.get('DB_PROVIDER', 'postgres'),
@@ -11,10 +11,10 @@ DB_CONFIG = dict(
     host=os.environ.get('DB_HOST', 'localhost'),
     port=os.environ.get('DB_PORT', '5433'))
 
-POSTGRES_USER_appeal.bind(**DB_CONFIG)
+UserAppealDB.bind(**DB_CONFIG)
 
 
-class UserAppeal(POSTGRES_USER_appeal.Entity):
+class UserAppeal(UserAppealDB.Entity):
     first_name = Required(str)
     last_name = Required(str)
     patronymic = Required(str)

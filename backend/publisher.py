@@ -1,9 +1,23 @@
 #!/usr/bin/env python
 
 import pika
+import logging
 import os
 from pika.exchange_type import ExchangeType
-from logger import logger
+
+
+def configure_logging():
+
+    global logger
+
+    logger = logging.getLogger('PublisherLog')
+    log_handler = logging.StreamHandler()
+    log_formatter = logging.Formatter(
+        fmt='%(levelname) -10s [%(asctime)s] %(name) -15s: %(message)s', datefmt='%d.%m.%Y %H:%M:%S'
+    )
+    log_handler.setFormatter(log_formatter)
+    logger.addHandler(log_handler)
+    logger.setLevel(logging.INFO)
 
 
 class Publisher:
@@ -57,11 +71,26 @@ class Publisher:
     def publish(self, body):
 
         self._channel.basic_publish(exchange=self.EXCHANGE_NAME,
-                                    routing_key=f'{self.QUEUE_NAME}-{self.EXCHANGE_NAME}',
+                                    routing_key=f"{self.QUEUE_NAME}-{self.EXCHANGE_NAME}",
                                     body=body)
 
         logger.info(f'Сообщение опубликовано в очереди: {self.QUEUE_NAME}')
 
     def disconnect(self):
 
+        logger.info("Отключение от очереди..")
+
         self._connection.close()
+
+    def run(self):
+
+        configure_logging()
+
+        logger.info("Подключение к RabbitMQ..")
+
+        self.connect_to_channel()
+        self.setup_exchange()
+        self.setup_queue()
+        self.queue_bind()
+
+        logger.info("Подключение к RabbitMQ выполнено")
